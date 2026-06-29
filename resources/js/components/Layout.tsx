@@ -88,12 +88,12 @@ export default function Layout({ children, user }: LayoutProps) {
                         </>
                     ) : (
                         <div className="flex flex-col gap-1.5">
-                            <Link href="/login" className="flex items-center justify-center bg-[#2563EB] hover:bg-[#1D4ED8] text-white text-sm font-medium px-3 py-2 rounded-lg transition-colors no-underline">
-                                Login
-                            </Link>
-                            <Link href="/register" className="flex items-center justify-center border border-[#2A4A72] text-[#93B4D4] text-sm px-3 py-2 rounded-lg hover:bg-[#2A4A72] hover:text-white transition-colors no-underline">
+                            <a href="/login" className="flex items-center justify-center bg-[#2563EB] hover:bg-[#1D4ED8] text-white text-sm font-medium px-3 py-2 rounded-lg transition-colors no-underline">
+                            Login
+                            </a>
+                            <a href="/register" className="flex items-center justify-center border border-[#2A4A72] text-[#93B4D4] text-sm px-3 py-2 rounded-lg hover:bg-[#2A4A72] hover:text-white transition-colors no-underline">
                                 Register
-                            </Link>
+                            </a>
                         </div>
                     )}
                 </div>

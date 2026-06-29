@@ -13,8 +13,8 @@ Route::get('/found-items', [ReportController::class, 'foundItems']);
 Route::middleware('auth')->group(function () {
 
     Route::get('/dashboard', function () {
-        return view('dashboard');
-    })->name('dashboard');
+        return redirect('/');
+    })->middleware(['auth', 'verified'])->name('dashboard');
 
     Route::get('/create-report', [ReportController::class, 'createReport']);
     Route::post('/reports', [ReportController::class, 'store'])
@@ -45,6 +45,9 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/dashboard-stats', [ReportController::class, 'dashboard'])
         ->name('dashboard.stats');
+
+    Route::patch('/reports/{id}/resolve', [ReportController::class, 'resolve'])
+        ->name('reports.resolve');
 });
 
 Route::get('/reports/{id}', [ReportController::class, 'show'])

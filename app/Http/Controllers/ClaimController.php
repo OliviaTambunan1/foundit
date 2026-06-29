@@ -22,6 +22,15 @@ class ClaimController extends Controller
             abort(403, 'Kamu tidak bisa mengklaim laporanmu sendiri.');
         }
 
+        // Validasi backend: cek duplikasi klaim
+        $existingClaim = Claim::where('report_id', $report->id)
+            ->where('claimer_id', Auth::id())
+            ->first();
+
+        if ($existingClaim) {
+            return back()->withErrors(['message' => 'Kamu sudah pernah mengklaim barang ini.']);
+        }
+
         Claim::create([
             'report_id' => $report->id,
             'claimer_id' => Auth::id(),

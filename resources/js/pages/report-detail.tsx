@@ -4,6 +4,7 @@ import Layout from '../components/Layout';
 interface Claimer {
     id: number;
     name: string;
+    phone: string | null;
 }
 
 interface ClaimItem {
@@ -23,7 +24,10 @@ interface ReportDetail {
     status: string;
     photo: string | null;
     user_id: number;
-    user: { name: string };
+    user: {
+        name: string;
+        phone: string | null;
+    };
     claims: ClaimItem[];
 }
 
@@ -59,9 +63,26 @@ function ClaimActions({ claimId }: { claimId: number }) {
     );
 }
 
+function ResolveButton({ reportId }: { reportId: number }) {
+    const { patch, processing } = useForm();
+    return (
+        <button
+            onClick={() => patch(`/reports/${reportId}/resolve`)}
+            disabled={processing}
+            className="bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors disabled:opacity-50"
+        >
+            {processing ? 'Memproses...' : '✓ Tandai Selesai'}
+        </button>
+    );
+}
+
 export default function ReportDetail({ report, auth }: ReportDetailProps) {
     const isOwner = auth.user && auth.user.id === report.user_id;
     const hasAlreadyClaimed = auth.user && report.claims.some((c) => c.claimer.id === auth.user!.id);
+    const approvedClaim = report.claims.find((c) => c.status === 'approved');
+    const myApprovedClaim = report.claims.find(
+        (c) => c.status === 'approved' && auth.user && c.claimer.id === auth.user.id
+    );
 
     const { data, setData, post, processing, errors, reset } = useForm({ message: '' });
 
@@ -77,13 +98,16 @@ export default function ReportDetail({ report, auth }: ReportDetailProps) {
         selesai: { label: 'Selesai', className: 'bg-slate-50 text-slate-500 border border-slate-100' },
     };
 
-    const statusCfg = STATUS_CONFIG[report.status] ?? { label: report.status, className: 'bg-slate-50 text-slate-500 border border-slate-100' };
+    const statusCfg = STATUS_CONFIG[report.status] ?? {
+        label: report.status,
+        className: 'bg-slate-50 text-slate-500 border border-slate-100',
+    };
 
     return (
         <Layout user={auth.user}>
             <div className="px-8 py-7 max-w-3xl">
                 {/* Header */}
-                <div className="flex items-start gap-3 mb-6">
+                <div className="flex items-start justify-between mb-6">
                     <div className="flex-1">
                         <div className="flex items-center gap-2 mb-2">
                             <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${statusCfg.className}`}>
@@ -93,6 +117,10 @@ export default function ReportDetail({ report, auth }: ReportDetailProps) {
                         </div>
                         <h1 className="text-xl font-semibold text-[#0F172A]">{report.title}</h1>
                     </div>
+                    {/* Tombol Tandai Selesai — hanya untuk pemilik, kalau status diklaim */}
+                    {isOwner && report.status === 'diklaim' && (
+                        <ResolveButton reportId={report.id} />
+                    )}
                 </div>
 
                 {/* Info Card */}
@@ -125,8 +153,33 @@ export default function ReportDetail({ report, auth }: ReportDetailProps) {
                     )}
                 </div>
 
+                {/* Kontak terbuka setelah approved — untuk pengklaim */}
+                {myApprovedClaim && (
+                    <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-5 mb-5">
+                        <p className="text-sm font-semibold text-emerald-800 mb-1">✓ Klaim kamu disetujui!</p>
+                        <p className="text-sm text-emerald-700 mb-3">
+                            Hubungi pemilik barang untuk mengatur serah terima:
+                        </p>
+                        {report.user.phone ? (
+                           
+                           <a
+                                href={`https://wa.me/${report.user.phone.replace(/\D/g, '')}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors no-underline"
+                            >
+                                💬 Hubungi via WhatsApp
+                            </a>
+                        ) : (
+                            <p className="text-sm text-emerald-600">
+                                Pemilik belum mencantumkan nomor WA. Hubungi langsung: <strong>{report.user.name}</strong>
+                            </p>
+                        )}
+                    </div>
+                )}
+
                 {/* Form Klaim */}
-                {!isOwner && !hasAlreadyClaimed && auth.user && (
+                {!isOwner && !hasAlreadyClaimed && auth.user && report.status !== 'selesai' && (
                     <div className="bg-white border border-[#E2E8F0] rounded-xl p-5 mb-5">
                         <h3 className="text-sm font-semibold text-[#0F172A] mb-3">Ajukan Klaim</h3>
                         <form onSubmit={handleClaimSubmit}>
@@ -149,13 +202,15 @@ export default function ReportDetail({ report, auth }: ReportDetailProps) {
                     </div>
                 )}
 
-                {hasAlreadyClaimed && (
+                {hasAlreadyClaimed && report.status !== 'selesai' && !myApprovedClaim && (
                     <div className="bg-blue-50 border border-blue-100 rounded-xl px-5 py-4 mb-5">
-                        <p className="text-sm text-blue-700">✓ Kamu sudah mengajukan klaim untuk barang ini. Pantau statusnya di halaman Klaim Saya.</p>
+                        <p className="text-sm text-blue-700">
+                            ✓ Kamu sudah mengajukan klaim. Pantau statusnya di halaman Klaim Saya.
+                        </p>
                     </div>
                 )}
 
-                {/* Daftar Klaim (owner only) */}
+                {/* Daftar Klaim — owner only */}
                 {isOwner && (
                     <div className="bg-white border border-[#E2E8F0] rounded-xl overflow-hidden">
                         <div className="px-5 py-4 border-b border-[#F1F5F9]">
@@ -174,14 +229,39 @@ export default function ReportDetail({ report, auth }: ReportDetailProps) {
                                         <div className="flex items-center justify-between mb-1">
                                             <p className="text-sm font-medium text-[#0F172A]">{claim.claimer.name}</p>
                                             <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
-                                                claim.status === 'approved' ? 'bg-emerald-50 text-emerald-600 border border-emerald-100' :
-                                                claim.status === 'rejected' ? 'bg-red-50 text-red-600 border border-red-100' :
-                                                'bg-amber-50 text-amber-600 border border-amber-100'
+                                                claim.status === 'approved'
+                                                    ? 'bg-emerald-50 text-emerald-600 border border-emerald-100'
+                                                    : claim.status === 'rejected'
+                                                    ? 'bg-red-50 text-red-600 border border-red-100'
+                                                    : 'bg-amber-50 text-amber-600 border border-amber-100'
                                             }`}>
                                                 {claim.status === 'approved' ? 'Disetujui' : claim.status === 'rejected' ? 'Ditolak' : 'Menunggu'}
                                             </span>
                                         </div>
-                                        <p className="text-sm text-[#64748B]">{claim.message}</p>
+                                        <p className="text-sm text-[#64748B] mb-2">{claim.message}</p>
+
+                                        {/* Kontak pengklaim — muncul ke pemilik setelah approve */}
+                                        {claim.status === 'approved' && (
+                                            <div className="bg-emerald-50 border border-emerald-100 rounded-lg px-3 py-2.5 mt-2">
+                                                <p className="text-xs text-emerald-700 font-medium mb-1">Kontak pengklaim:</p>
+                                                {claim.claimer.phone ? (
+                                                    
+                                                    <a
+                                                        href={`https://wa.me/${claim.claimer.phone.replace(/\D/g, '')}`}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="inline-flex items-center gap-1.5 text-xs bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-lg transition-colors no-underline font-medium"
+                                                    >
+                                                        💬 WhatsApp {claim.claimer.name}
+                                                    </a>
+                                                ) : (
+                                                    <p className="text-xs text-emerald-600">
+                                                        {claim.claimer.name} belum mencantumkan nomor WA.
+                                                    </p>
+                                                )}
+                                            </div>
+                                        )}
+
                                         {claim.status === 'pending' && <ClaimActions claimId={claim.id} />}
                                     </div>
                                 ))}

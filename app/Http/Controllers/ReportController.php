@@ -10,6 +10,23 @@ use Inertia\Inertia;
 class ReportController extends Controller
 {
     private const CATEGORIES = ['Elektronik', 'Dokumen', 'Aksesoris', 'Pakaian', 'Buku/Alat Tulis', 'Lainnya'];
+
+    private function getReports(string $type, Request $request)
+    {
+        return Report::where('type', $type)
+            ->when($request->search, function ($query, $search) {
+                $query->where(function ($q) use ($search) {
+                    $q->where('title', 'like', "%{$search}%")
+                        ->orWhere('location', 'like', "%{$search}%");
+                });
+            })
+            ->when($request->category, function ($query, $category) {
+                $query->where('category', $category);
+            })
+            ->latest()
+            ->get();
+    }
+
     public function home()
     {
         $reports = Report::latest()->take(6)->get();
@@ -21,21 +38,8 @@ class ReportController extends Controller
 
     public function lostItems(Request $request)
     {
-        $reports = Report::where('type', 'lost')
-            ->when($request->search, function ($query, $search) {
-                $query->where(function ($q) use ($search) {
-                    $q->where('title', 'like', "%{$search}%")
-                        ->orWhere('location', 'like', "%{$search}%");
-                });
-            })
-            ->when($request->category, function ($query, $category) {
-                $query->where('category', $category);
-            })
-            ->latest()
-            ->get();
-
         return Inertia::render('lost-items', [
-            'reports' => $reports,
+            'reports' => $this->getReports('lost', $request),
             'filters' => $request->only(['search', 'category']),
             'categories' => self::CATEGORIES,
         ]);
@@ -43,26 +47,12 @@ class ReportController extends Controller
 
     public function foundItems(Request $request)
     {
-        $reports = Report::where('type', 'found')
-            ->when($request->search, function ($query, $search) {
-                $query->where(function ($q) use ($search) {
-                    $q->where('title', 'like', "%{$search}%")
-                        ->orWhere('location', 'like', "%{$search}%");
-                });
-            })
-            ->when($request->category, function ($query, $category) {
-                $query->where('category', $category);
-            })
-            ->latest()
-            ->get();
-
         return Inertia::render('found-items', [
-            'reports' => $reports,
+            'reports' => $this->getReports('found', $request),
             'filters' => $request->only(['search', 'category']),
             'categories' => self::CATEGORIES,
         ]);
     }
-
     public function createReport()
     {
         return Inertia::render('create-report', [
@@ -106,9 +96,6 @@ class ReportController extends Controller
 
         return Inertia::render('report-detail', [
             'report' => $report,
-            'auth' => [
-                'user' => Auth::user(),
-            ],
         ]);
     }
 
@@ -192,5 +179,18 @@ class ReportController extends Controller
             'stats' => $stats,
             'recentReports' => $recentReports,
         ]);
+    }
+
+    public function resolve($id)
+    {
+        $report = Report::findOrFail($id);
+
+        if ($report->user_id !== Auth::id()) {
+            abort(403);
+        }
+
+        $report->update(['status' => 'selesai']);
+
+        return back()->with('success', 'Laporan ditandai selesai.');
     }
 }

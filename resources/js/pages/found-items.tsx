@@ -9,6 +9,7 @@ interface ReportItem {
     location: string;
     category: string;
     status: string;
+    photo: string | null;
 }
 
 interface AuthUser {
@@ -80,25 +81,32 @@ export default function FoundItems({ reports, filters, categories, auth }: Found
                             <Link
                                 key={report.id}
                                 href={`/reports/${report.id}`}
-                                className="bg-white border border-[#E2E8F0] rounded-xl p-5 hover:shadow-md hover:border-[#2563EB]/30 transition-all no-underline group"
+                                className="bg-white border border-[#E2E8F0] rounded-xl overflow-hidden hover:shadow-md hover:border-[#2563EB]/30 transition-all no-underline group"
                             >
-                                <div className="flex items-start justify-between mb-3">
-                                    <span className="text-xs px-2.5 py-1 rounded-full font-medium bg-emerald-50 text-emerald-600 border border-emerald-100">
-                                        Ditemukan
-                                    </span>
-                                    <span className="text-xs text-[#94A3B8] bg-[#F8FAFC] px-2 py-0.5 rounded-md border border-[#E2E8F0]">
-                                        {report.category}
-                                    </span>
+                                {report.photo ? (
+                                    <img src={`/storage/${report.photo}`} alt={report.title} className="w-full h-36 object-cover" />
+                                ) : (
+                                    <div className="w-full h-36 bg-[#F8FAFC] flex items-center justify-center text-3xl">📦</div>
+                                )}
+                                <div className="p-5">
+                                    <div className="flex items-start justify-between mb-3">
+                                        <span className="text-xs px-2.5 py-1 rounded-full font-medium bg-emerald-50 text-emerald-600 border border-emerald-100">
+                                            Ditemukan
+                                        </span>
+                                        <span className="text-xs text-[#94A3B8] bg-[#F8FAFC] px-2 py-0.5 rounded-md border border-[#E2E8F0]">
+                                            {report.category}
+                                        </span>
+                                    </div>
+                                    <h3 className="text-sm font-semibold text-[#0F172A] group-hover:text-[#2563EB] transition-colors mb-1.5">
+                                        {report.title}
+                                    </h3>
+                                    <p className="text-xs text-[#94A3B8] mb-2 line-clamp-2">
+                                        {report.description ?? 'Tidak ada deskripsi'}
+                                    </p>
+                                    <p className="text-xs text-[#64748B] flex items-center gap-1">
+                                        <span>📍</span> {report.location}
+                                    </p>
                                 </div>
-                                <h3 className="text-sm font-semibold text-[#0F172A] group-hover:text-[#2563EB] transition-colors mb-1.5">
-                                    {report.title}
-                                </h3>
-                                <p className="text-xs text-[#94A3B8] mb-2 line-clamp-2">
-                                    {report.description ?? 'Tidak ada deskripsi'}
-                                </p>
-                                <p className="text-xs text-[#64748B] flex items-center gap-1">
-                                    <span>📍</span> {report.location}
-                                </p>
                             </Link>
                         ))}
                     </div>

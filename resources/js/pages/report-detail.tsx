@@ -122,6 +122,17 @@ export default function ReportDetail({ report, auth }: ReportDetailProps) {
                         <ResolveButton reportId={report.id} />
                     )}
                 </div>
+                
+                {/* Foto Barang */}
+                {report.photo && (
+                    <div className="bg-white border border-[#E2E8F0] rounded-xl overflow-hidden mb-5">
+                        <img
+                            src={`/storage/${report.photo}`}
+                            alt={report.title}
+                            className="w-full max-h-80 object-cover"
+                        />
+                    </div>
+                )}
 
                 {/* Info Card */}
                 <div className="bg-white border border-[#E2E8F0] rounded-xl p-5 mb-5">

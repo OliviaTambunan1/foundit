@@ -11,6 +11,7 @@ const NAV_ITEMS = [
     { href: '/found-items', label: 'Barang Ditemukan', icon: '✓' },
     { href: '/my-reports', label: 'Laporan Saya', icon: '≡' },
     { href: '/my-claims', label: 'Klaim Saya', icon: '◈' },
+    { href: '/settings', label: 'Pengaturan', icon: '⚙' },
 ];
 
 export default function Layout({ children, user }: LayoutProps) {

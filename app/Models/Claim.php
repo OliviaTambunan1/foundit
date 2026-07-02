@@ -10,6 +10,7 @@ class Claim extends Model
         'report_id',
         'claimer_id',
         'message',
+        'photo',
         'status'
     ];
 

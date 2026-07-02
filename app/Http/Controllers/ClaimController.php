@@ -14,6 +14,18 @@ class ClaimController extends Controller
     {
         $validated = $request->validate([
             'message' => 'required|string|max:1000',
+            'photo' => [
+                'nullable',
+                'image',
+                'max:2048',
+                // Foto wajib untuk laporan lost, opsional untuk found
+                function ($attribute, $value, $fail) use ($request, $reportId) {
+                    $report = \App\Models\Report::find($reportId);
+                    if ($report && $report->type === 'lost' && !$value) {
+                        $fail('Foto bukti wajib disertakan untuk laporan barang hilang.');
+                    }
+                },
+            ],
         ]);
 
         $report = Report::findOrFail($reportId);
@@ -22,24 +34,29 @@ class ClaimController extends Controller
             abort(403, 'Kamu tidak bisa mengklaim laporanmu sendiri.');
         }
 
-        // Validasi backend: cek duplikasi klaim
         $existingClaim = Claim::where('report_id', $report->id)
             ->where('claimer_id', Auth::id())
             ->first();
 
         if ($existingClaim) {
-            return back()->withErrors(['message' => 'Kamu sudah pernah mengklaim barang ini.']);
+            return back()->withErrors(['message' => 'Kamu sudah pernah mengajukan untuk laporan ini.']);
+        }
+
+        $photoPath = null;
+        if ($request->hasFile('photo')) {
+            $photoPath = $request->file('photo')->store('claims', 'public');
         }
 
         Claim::create([
             'report_id' => $report->id,
             'claimer_id' => Auth::id(),
             'message' => $validated['message'],
+            'photo' => $photoPath,
             'status' => 'pending',
         ]);
 
         return redirect()->route('reports.show', $report->id)
-            ->with('success', 'Klaim berhasil diajukan.');
+            ->with('success', 'Berhasil diajukan.');
     }
 
     public function approve($id)
@@ -50,7 +67,22 @@ class ClaimController extends Controller
             abort(403);
         }
 
+        $alreadyApproved = Claim::where('report_id', $claim->report_id)
+            ->where('status', 'approved')
+            ->where('id', '!=', $claim->id)
+            ->exists();
+
+        if ($alreadyApproved) {
+            return back()->withErrors(['error' => 'Sudah ada klaim yang disetujui untuk laporan ini.']);
+        }
+
         $claim->update(['status' => 'approved']);
+
+        Claim::where('report_id', $claim->report_id)
+            ->where('status', 'pending')
+            ->where('id', '!=', $claim->id)
+            ->update(['status' => 'rejected']);
+
         $claim->report->update(['status' => 'diklaim']);
 
         return back()->with('success', 'Klaim disetujui.');

@@ -10,6 +10,7 @@ interface Claimer {
 interface ClaimItem {
     id: number;
     message: string;
+    photo: string | null;
     status: string;
     claimer: Claimer;
 }
@@ -76,32 +77,63 @@ function ResolveButton({ reportId }: { reportId: number }) {
     );
 }
 
+const STATUS_CONFIG: Record<string, { label: string; className: string }> = {
+    hilang: { label: 'Hilang', className: 'bg-red-50 text-red-600 border border-red-100' },
+    ditemukan: { label: 'Ditemukan', className: 'bg-emerald-50 text-emerald-600 border border-emerald-100' },
+    diklaim: { label: 'Diklaim', className: 'bg-blue-50 text-blue-600 border border-blue-100' },
+    selesai: { label: 'Selesai', className: 'bg-slate-50 text-slate-500 border border-slate-100' },
+};
+
 export default function ReportDetail({ report, auth }: ReportDetailProps) {
     const isOwner = auth.user && auth.user.id === report.user_id;
     const hasAlreadyClaimed = auth.user && report.claims.some((c) => c.claimer.id === auth.user!.id);
-    const approvedClaim = report.claims.find((c) => c.status === 'approved');
     const myApprovedClaim = report.claims.find(
         (c) => c.status === 'approved' && auth.user && c.claimer.id === auth.user.id
     );
+    const isResolved = report.status === 'selesai';
 
-    const { data, setData, post, processing, errors, reset } = useForm({ message: '' });
+    // Label & placeholder dinamis berdasarkan tipe laporan
+    const claimLabel = report.type === 'lost'
+        ? 'Saya Menemukan Barang Ini'
+        : 'Ini Barang Saya';
+    const claimPlaceholder = report.type === 'lost'
+        ? 'Ceritakan di mana dan kapan kamu menemukannya, serta kondisi barang...'
+        : 'Jelaskan bukti kepemilikan atau ciri khas barang yang hanya kamu ketahui...';
+    const claimSectionTitle = report.type === 'lost'
+        ? 'Saya Menemukan Barang Ini'
+        : 'Ajukan Klaim Kepemilikan';
+    const claimListTitle = report.type === 'lost'
+        ? 'Laporan Penemuan Masuk'
+        : 'Klaim Masuk';
+    const contactLabel = report.type === 'lost'
+        ? 'Laporan penemuanmu dikonfirmasi! Hubungi pemilik untuk serah terima:'
+        : 'Klaim kepemilikanmu disetujui! Hubungi penemu untuk serah terima:';
 
-    function handleClaimSubmit(e: React.FormEvent) {
-        e.preventDefault();
-        post(`/reports/${report.id}/claims`, { onSuccess: () => reset() });
-    }
 
-    const STATUS_CONFIG: Record<string, { label: string; className: string }> = {
-        hilang: { label: 'Hilang', className: 'bg-red-50 text-red-600 border border-red-100' },
-        ditemukan: { label: 'Ditemukan', className: 'bg-emerald-50 text-emerald-600 border border-emerald-100' },
-        diklaim: { label: 'Diklaim', className: 'bg-blue-50 text-blue-600 border border-blue-100' },
-        selesai: { label: 'Selesai', className: 'bg-slate-50 text-slate-500 border border-slate-100' },
-    };
+        const { data, setData, post, processing, errors, reset } = useForm<{
+    message: string;
+    photo: File | null;
+}>({
+    message: '',
+    photo: null,
+});
+
+function handleClaimSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    post(`/reports/${report.id}/claims`, {
+        forceFormData: true,
+        onSuccess: () => reset(),
+    });
+}
 
     const statusCfg = STATUS_CONFIG[report.status] ?? {
         label: report.status,
         className: 'bg-slate-50 text-slate-500 border border-slate-100',
     };
+
+    // Tombol Tandai Selesai muncul kalau:
+    // pemilik + (status diklaim ATAU status lain selain selesai — buat kasus nemu sendiri)
+    const canResolve = isOwner && !isResolved;
 
     return (
         <Layout user={auth.user}>
@@ -117,13 +149,10 @@ export default function ReportDetail({ report, auth }: ReportDetailProps) {
                         </div>
                         <h1 className="text-xl font-semibold text-[#0F172A]">{report.title}</h1>
                     </div>
-                    {/* Tombol Tandai Selesai — hanya untuk pemilik, kalau status diklaim */}
-                    {isOwner && report.status === 'diklaim' && (
-                        <ResolveButton reportId={report.id} />
-                    )}
+                    {canResolve && <ResolveButton reportId={report.id} />}
                 </div>
-                
-                {/* Foto Barang */}
+
+                {/* Foto */}
                 {report.photo && (
                     <div className="bg-white border border-[#E2E8F0] rounded-xl overflow-hidden mb-5">
                         <img
@@ -164,59 +193,81 @@ export default function ReportDetail({ report, auth }: ReportDetailProps) {
                     )}
                 </div>
 
-                {/* Kontak terbuka setelah approved — untuk pengklaim */}
+                {/* Kontak terbuka setelah approved — untuk pihak yang klaim/lapor temuan */}
                 {myApprovedClaim && (
                     <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-5 mb-5">
-                        <p className="text-sm font-semibold text-emerald-800 mb-1">✓ Klaim kamu disetujui!</p>
-                        <p className="text-sm text-emerald-700 mb-3">
-                            Hubungi pemilik barang untuk mengatur serah terima:
-                        </p>
+                        <p className="text-sm font-semibold text-emerald-800 mb-1">✓ Dikonfirmasi!</p>
+                        <p className="text-sm text-emerald-700 mb-3">{contactLabel}</p>
                         {report.user.phone ? (
-                           
-                           <a
+                            
+                            <a
                                 href={`https://wa.me/${report.user.phone.replace(/\D/g, '')}`}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="inline-flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors no-underline"
                             >
-                                💬 Hubungi via WhatsApp
+                                💬 Hubungi {report.user.name} via WhatsApp
                             </a>
                         ) : (
                             <p className="text-sm text-emerald-600">
-                                Pemilik belum mencantumkan nomor WA. Hubungi langsung: <strong>{report.user.name}</strong>
+                                {report.user.name} belum mencantumkan nomor WA.
                             </p>
                         )}
                     </div>
                 )}
 
-                {/* Form Klaim */}
-                {!isOwner && !hasAlreadyClaimed && auth.user && report.status !== 'selesai' && (
+                {/* Form Klaim / Lapor Temuan */}
+                {!isOwner && !hasAlreadyClaimed && auth.user && !isResolved && (
                     <div className="bg-white border border-[#E2E8F0] rounded-xl p-5 mb-5">
-                        <h3 className="text-sm font-semibold text-[#0F172A] mb-3">Ajukan Klaim</h3>
+                        <h3 className="text-sm font-semibold text-[#0F172A] mb-1">{claimSectionTitle}</h3>
+                        <p className="text-xs text-[#94A3B8] mb-3">
+                            {report.type === 'lost'
+                                ? 'Informasi ini akan dikirim ke pelapor untuk diverifikasi sebelum kontak dibuka.'
+                                : 'Buktimu akan diperiksa penemu sebelum kepemilikan dikonfirmasi.'}
+                        </p>
+
                         <form onSubmit={handleClaimSubmit}>
                             <textarea
-                                placeholder="Jelaskan bukti kepemilikan atau ciri khas barang..."
+                                placeholder={claimPlaceholder}
                                 value={data.message}
                                 onChange={(e) => setData('message', e.target.value)}
                                 rows={3}
-                                className="w-full border border-[#E2E8F0] rounded-lg px-4 py-3 text-sm text-[#0F172A] placeholder-[#94A3B8] focus:outline-none focus:ring-2 focus:ring-[#2563EB]/30 focus:border-[#2563EB] resize-none"
+                                className="w-full border border-[#E2E8F0] rounded-lg px-4 py-3 text-sm text-[#0F172A] placeholder-[#94A3B8] focus:outline-none focus:ring-2 focus:ring-[#2563EB]/30 focus:border-[#2563EB] resize-none mb-3"
                             />
-                            {errors.message && <p className="text-xs text-red-500 mt-1">{errors.message}</p>}
+                            {errors.message && <p className="text-xs text-red-500 mb-2">{errors.message}</p>}
+
+                            <div className="border-2 border-dashed border-[#E2E8F0] rounded-lg px-4 py-4 text-center hover:border-[#2563EB]/50 transition-colors mb-1">
+                                <p className="text-xs text-[#94A3B8] mb-2">
+                                    {report.type === 'lost'
+                                        ? '📷 Foto bukti wajib — upload foto barang yang kamu temukan'
+                                        : '📷 Foto opsional — upload foto sebagai bukti tambahan'}
+                                </p>
+                                <input
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={(e) => setData('photo', e.target.files ? e.target.files[0] : null)}
+                                    className="text-xs text-[#64748B]"
+                                />
+                            </div>
+                            {errors.photo && <p className="text-xs text-red-500 mb-2">{errors.photo}</p>}
+
                             <button
                                 type="submit"
                                 disabled={processing}
                                 className="mt-3 bg-[#1E3A5F] hover:bg-[#2563EB] text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors disabled:opacity-50"
                             >
-                                {processing ? 'Mengirim...' : 'Ajukan Klaim'}
+                                {processing ? 'Mengirim...' : claimLabel}
                             </button>
                         </form>
                     </div>
                 )}
 
-                {hasAlreadyClaimed && report.status !== 'selesai' && !myApprovedClaim && (
+                {hasAlreadyClaimed && !isResolved && !myApprovedClaim && (
                     <div className="bg-blue-50 border border-blue-100 rounded-xl px-5 py-4 mb-5">
                         <p className="text-sm text-blue-700">
-                            ✓ Kamu sudah mengajukan klaim. Pantau statusnya di halaman Klaim Saya.
+                            {report.type === 'lost'
+                                ? '✓ Laporan penemuanmu sudah terkirim. Tunggu konfirmasi dari pelapor.'
+                                : '✓ Klaimmu sudah terkirim. Pantau statusnya di halaman Klaim Saya.'}
                         </p>
                     </div>
                 )}
@@ -226,12 +277,16 @@ export default function ReportDetail({ report, auth }: ReportDetailProps) {
                     <div className="bg-white border border-[#E2E8F0] rounded-xl overflow-hidden">
                         <div className="px-5 py-4 border-b border-[#F1F5F9]">
                             <h3 className="text-sm font-semibold text-[#0F172A]">
-                                Klaim Masuk ({report.claims.length})
+                                {claimListTitle} ({report.claims.length})
                             </h3>
                         </div>
                         {report.claims.length === 0 ? (
                             <div className="px-5 py-8 text-center">
-                                <p className="text-sm text-[#64748B]">Belum ada yang mengajukan klaim.</p>
+                                <p className="text-sm text-[#64748B]">
+                                    {report.type === 'lost'
+                                        ? 'Belum ada yang melaporkan menemukan barang ini.'
+                                        : 'Belum ada yang mengajukan klaim.'}
+                                </p>
                             </div>
                         ) : (
                             <div className="divide-y divide-[#F1F5F9]">
@@ -246,18 +301,33 @@ export default function ReportDetail({ report, auth }: ReportDetailProps) {
                                                     ? 'bg-red-50 text-red-600 border border-red-100'
                                                     : 'bg-amber-50 text-amber-600 border border-amber-100'
                                             }`}>
-                                                {claim.status === 'approved' ? 'Disetujui' : claim.status === 'rejected' ? 'Ditolak' : 'Menunggu'}
+                                                {claim.status === 'approved'
+                                                    ? 'Dikonfirmasi'
+                                                    : claim.status === 'rejected'
+                                                    ? 'Ditolak'
+                                                    : 'Menunggu'}
                                             </span>
                                         </div>
-                                        <p className="text-sm text-[#64748B] mb-2">{claim.message}</p>
 
-                                        {/* Kontak pengklaim — muncul ke pemilik setelah approve */}
+                                        <p className="text-sm text-[#64748B] mb-2">{claim.message}</p>
+                                        {claim.photo && (
+                                            <div className="mt-2 mb-2">
+                                                <img
+                                                    src={`/storage/${claim.photo}`}
+                                                    alt="Foto bukti"
+                                                    className="w-full max-h-48 object-cover rounded-lg border border-[#E2E8F0]"
+                                                />
+                                            </div>
+                                        )}
+
                                         {claim.status === 'approved' && (
                                             <div className="bg-emerald-50 border border-emerald-100 rounded-lg px-3 py-2.5 mt-2">
-                                                <p className="text-xs text-emerald-700 font-medium mb-1">Kontak pengklaim:</p>
+                                                <p className="text-xs text-emerald-700 font-medium mb-1">
+                                                    {report.type === 'lost' ? 'Kontak penemu:' : 'Kontak pengklaim:'}
+                                                </p>
                                                 {claim.claimer.phone ? (
                                                     
-                                                    <a
+                                                    <a  
                                                         href={`https://wa.me/${claim.claimer.phone.replace(/\D/g, '')}`}
                                                         target="_blank"
                                                         rel="noopener noreferrer"

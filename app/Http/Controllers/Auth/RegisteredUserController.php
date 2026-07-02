@@ -33,9 +33,19 @@ class RegisteredUserController extends Controller
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:' . User::class],
-            'phone' => ['nullable', 'string', 'regex:/^628[0-9]{8,12}$/'],
+            'phone' => ['nullable', 'string', 'max:20'],            
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ]);
+
+        $phone = $request->phone;
+        if ($phone) {
+            $phone = preg_replace('/\D/', '', $phone); // hapus semua non-angka
+            if (str_starts_with($phone, '0')) {
+                $phone = '62' . substr($phone, 1); // 08xxx → 628xxx
+            } elseif (str_starts_with($phone, '+62')) {
+                $phone = substr($phone, 1); // +628xxx → 628xxx
+            }
+        }
 
         $user = User::create([
             'name' => $request->name,

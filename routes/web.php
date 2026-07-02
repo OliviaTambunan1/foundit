@@ -48,6 +48,11 @@ Route::middleware('auth')->group(function () {
 
     Route::patch('/reports/{id}/resolve', [ReportController::class, 'resolve'])
         ->name('reports.resolve');
+
+    Route::get('/settings', [App\Http\Controllers\SettingsController::class, 'edit'])
+    ->name('settings.edit');
+    Route::patch('/settings', [App\Http\Controllers\SettingsController::class, 'update'])
+    ->name('settings.update');
 });
 
 Route::get('/reports/{id}', [ReportController::class, 'show'])

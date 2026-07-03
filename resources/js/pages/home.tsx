@@ -58,7 +58,6 @@ export default function Home({ reports, auth }: HomeProps) {
                                         <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${cfg.className}`}>
                                             {cfg.label}
                                         </span>
-                                        <span className="text-xs text-[#94A3B8]">{report.type === 'lost' ? '🔍' : '✓'}</span>
                                     </div>
                                     <h3 className="text-sm font-semibold text-[#0F172A] group-hover:text-[#2563EB] transition-colors mb-1.5">
                                         {report.title}

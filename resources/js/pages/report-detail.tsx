@@ -1,5 +1,6 @@
 import { useForm } from '@inertiajs/react';
 import Layout from '../components/Layout';
+import { MapPin, CheckCircle } from 'lucide-react';
 
 interface Claimer {
     id: number;
@@ -168,7 +169,8 @@ function handleClaimSubmit(e: React.FormEvent) {
                     <div className="grid grid-cols-2 gap-4">
                         <div>
                             <p className="text-xs text-[#94A3B8] uppercase tracking-wide mb-1">Lokasi</p>
-                            <p className="text-sm text-[#0F172A] font-medium">📍 {report.location}</p>
+                            <p className="text-sm text-[#0F172A] font-medium flex items-center gap-1.5">
+                            <MapPin size={13} className="text-[#94A3B8]" /> {report.location} </p>
                         </div>
                         <div>
                             <p className="text-xs text-[#94A3B8] uppercase tracking-wide mb-1">Dilaporkan oleh</p>

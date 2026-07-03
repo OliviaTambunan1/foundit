@@ -1,4 +1,15 @@
 import { Link, router, usePage } from '@inertiajs/react';
+import {
+    LayoutDashboard,
+    Search,
+    PackageCheck,
+    ClipboardList,
+    Handshake,
+    Settings,
+    Plus,
+    LogOut,
+    MapPin
+} from 'lucide-react';
 
 interface LayoutProps {
     children: React.ReactNode;
@@ -6,12 +17,12 @@ interface LayoutProps {
 }
 
 const NAV_ITEMS = [
-    { href: '/dashboard-stats', label: 'Dashboard', icon: '▦' },
-    { href: '/lost-items', label: 'Barang Hilang', icon: '○' },
-    { href: '/found-items', label: 'Barang Ditemukan', icon: '✓' },
-    { href: '/my-reports', label: 'Laporan Saya', icon: '≡' },
-    { href: '/my-claims', label: 'Klaim Saya', icon: '◈' },
-    { href: '/settings', label: 'Pengaturan', icon: '⚙' },
+    { href: '/dashboard-stats', label: 'Dashboard', icon: LayoutDashboard },
+    { href: '/lost-items', label: 'Barang Hilang', icon: Search },
+    { href: '/found-items', label: 'Barang Ditemukan', icon: PackageCheck },
+    { href: '/my-reports', label: 'Laporan Saya', icon: ClipboardList },
+    { href: '/my-claims', label: 'Klaim Saya', icon: Handshake },
+    { href: '/settings', label: 'Pengaturan', icon: Settings },
 ];
 
 export default function Layout({ children, user }: LayoutProps) {
@@ -38,34 +49,36 @@ export default function Layout({ children, user }: LayoutProps) {
 
                 {/* Nav */}
                 <nav className="flex-1 px-3 py-4 flex flex-col gap-0.5 overflow-y-auto">
-                    {user ? (
-                        NAV_ITEMS.map((item) => {
-                            const isActive = url === item.href || url.startsWith(item.href + '/');
-                            return (
-                                <Link
-                                    key={item.href}
-                                    href={item.href}
-                                    className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-all no-underline ${
-                                        isActive
-                                            ? 'bg-[#2563EB] text-white font-medium'
-                                            : 'text-[#93B4D4] hover:bg-[#2A4A72] hover:text-white'
-                                    }`}
-                                >
-                                    <span className="text-sm opacity-80">{item.icon}</span>
-                                    {item.label}
-                                </Link>
-                            );
-                        })
-                    ) : (
-                        <>
-                            <Link href="/lost-items" className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-[#93B4D4] hover:bg-[#2A4A72] hover:text-white transition-all no-underline">
-                                <span>○</span> Barang Hilang
+                {user ? (
+                    NAV_ITEMS.map((item) => {
+                        const isActive = url === item.href || url.startsWith(item.href + '/');
+                        return (
+                            <Link
+                                key={item.href}
+                                href={item.href}
+                                className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-all no-underline ${
+                                    isActive
+                                        ? 'bg-[#2563EB] text-white font-medium'
+                                        : 'text-[#93B4D4] hover:bg-[#2A4A72] hover:text-white'
+                                }`}
+                            >
+                                <item.icon size={15} className="opacity-80 flex-shrink-0" />
+                                {item.label}
                             </Link>
-                            <Link href="/found-items" className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-[#93B4D4] hover:bg-[#2A4A72] hover:text-white transition-all no-underline">
-                                <span>✓</span> Barang Ditemukan
-                            </Link>
-                        </>
-                    )}
+                        );
+                    })
+                ) : (
+                    <>
+                        <Link href="/lost-items" className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-[#93B4D4] hover:bg-[#2A4A72] hover:text-white transition-all no-underline">
+                            <Search size={15} className="opacity-80 flex-shrink-0" />
+                            Barang Hilang
+                        </Link>
+                        <Link href="/found-items" className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-[#93B4D4] hover:bg-[#2A4A72] hover:text-white transition-all no-underline">
+                            <PackageCheck size={15} className="opacity-80 flex-shrink-0" />
+                            Barang Ditemukan
+                        </Link>
+                    </>
+                )}
                 </nav>
 
                 {/* Bottom */}
@@ -76,12 +89,14 @@ export default function Layout({ children, user }: LayoutProps) {
                                 href="/create-report"
                                 className="flex items-center justify-center gap-1.5 bg-[#2563EB] hover:bg-[#1D4ED8] text-white text-sm font-medium px-3 py-2 rounded-lg transition-colors no-underline"
                             >
-                                + Lapor Barang
+                                <Plus size={14} />
+                                Lapor Barang
                             </Link>
                             <div className="flex items-center justify-between px-1 mt-1">
                                 <span className="text-xs text-[#93B4D4] truncate max-w-[110px]">{user.name}</span>
                                 <form onSubmit={handleLogout}>
-                                    <button type="submit" className="text-xs text-[#93B4D4] hover:text-red-400 transition-colors">
+                                    <button type="submit" className="flex items-center gap-1 text-xs text-[#93B4D4] hover:text-red-400 transition-colors">
+                                        <LogOut size={12} />
                                         Logout
                                     </button>
                                 </form>

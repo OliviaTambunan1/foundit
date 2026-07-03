@@ -1,6 +1,7 @@
 import { Link, router } from '@inertiajs/react';
 import { useState } from 'react';
 import Layout from '../components/Layout';
+import { MapPin } from 'lucide-react';
 
 interface ReportItem {
     id: number;
@@ -104,7 +105,7 @@ export default function FoundItems({ reports, filters, categories, auth }: Found
                                         {report.description ?? 'Tidak ada deskripsi'}
                                     </p>
                                     <p className="text-xs text-[#64748B] flex items-center gap-1">
-                                        <span>📍</span> {report.location}
+                                    <MapPin size={11} className="text-[#94A3B8]" /> {report.location}
                                     </p>
                                 </div>
                             </Link>

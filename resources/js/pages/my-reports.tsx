@@ -1,11 +1,14 @@
 import { Link } from '@inertiajs/react';
+import { ClipboardList } from 'lucide-react';
 import Layout from '../components/Layout';
+import { formatDate } from '../lib/formatDate';
 
 interface ReportItem {
     id: number;
     title: string;
     type: string;
     status: string;
+    created_at: string;
 }
 
 interface AuthUser {
@@ -34,17 +37,14 @@ export default function MyReports({ reports, auth }: MyReportsProps) {
                         <h1 className="text-xl font-semibold text-[#0F172A]">Laporan Saya</h1>
                         <p className="text-sm text-[#64748B] mt-0.5">Kelola laporan barang yang kamu buat</p>
                     </div>
-                    <Link
-                        href="/create-report"
-                        className="bg-[#1E3A5F] hover:bg-[#2563EB] text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors no-underline"
-                    >
+                    <Link href="/create-report" className="bg-[#1E3A5F] hover:bg-[#2563EB] text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors no-underline">
                         + Lapor Barang
                     </Link>
                 </div>
 
                 {reports.length === 0 ? (
                     <div className="flex flex-col items-center justify-center py-20 text-center">
-                        <p className="text-4xl mb-3">📋</p>
+                        <ClipboardList size={40} className="text-[#CBD5E1] mb-3" />
                         <p className="text-[#0F172A] font-medium">Belum ada laporan</p>
                         <p className="text-sm text-[#64748B] mt-1">Kamu belum membuat laporan apapun</p>
                         <Link href="/create-report" className="mt-4 bg-[#1E3A5F] hover:bg-[#2563EB] text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors no-underline">
@@ -59,6 +59,7 @@ export default function MyReports({ reports, auth }: MyReportsProps) {
                                     <th className="text-left text-xs font-medium text-[#64748B] uppercase tracking-wide px-6 py-3">Judul</th>
                                     <th className="text-left text-xs font-medium text-[#64748B] uppercase tracking-wide px-6 py-3">Tipe</th>
                                     <th className="text-left text-xs font-medium text-[#64748B] uppercase tracking-wide px-6 py-3">Status</th>
+                                    <th className="text-left text-xs font-medium text-[#64748B] uppercase tracking-wide px-6 py-3">Dilaporkan</th>
                                     <th className="text-left text-xs font-medium text-[#64748B] uppercase tracking-wide px-6 py-3">Aksi</th>
                                 </tr>
                             </thead>
@@ -66,10 +67,7 @@ export default function MyReports({ reports, auth }: MyReportsProps) {
                                 {reports.map((report, i) => {
                                     const cfg = STATUS_CONFIG[report.status] ?? { label: report.status, className: 'bg-slate-50 text-slate-500 border border-slate-100' };
                                     return (
-                                        <tr
-                                            key={report.id}
-                                            className={`hover:bg-[#F8FAFC] transition-colors ${i !== reports.length - 1 ? 'border-b border-[#F1F5F9]' : ''}`}
-                                        >
+                                        <tr key={report.id} className={`hover:bg-[#F8FAFC] transition-colors ${i !== reports.length - 1 ? 'border-b border-[#F1F5F9]' : ''}`}>
                                             <td className="px-6 py-3.5">
                                                 <Link href={`/reports/${report.id}`} className="text-sm font-medium text-[#0F172A] hover:text-[#2563EB] no-underline transition-colors">
                                                     {report.title}
@@ -83,11 +81,11 @@ export default function MyReports({ reports, auth }: MyReportsProps) {
                                                     {cfg.label}
                                                 </span>
                                             </td>
+                                            <td className="px-6 py-3.5 text-xs text-[#94A3B8]">
+                                                {formatDate(report.created_at)}
+                                            </td>
                                             <td className="px-6 py-3.5">
-                                                <Link
-                                                    href={`/reports/${report.id}/edit`}
-                                                    className="text-xs text-[#2563EB] hover:text-[#1D4ED8] no-underline font-medium"
-                                                >
+                                                <Link href={`/reports/${report.id}/edit`} className="text-xs text-[#2563EB] hover:text-[#1D4ED8] no-underline font-medium">
                                                     Edit
                                                 </Link>
                                             </td>

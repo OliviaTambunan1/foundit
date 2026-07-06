@@ -4,4 +4,5 @@ jobs:
   skip:
     runs-on: ubuntu-latest
     steps:
-      - run: echo "Tests skipped - not configured yet"
+      - run: echo "Tests skipped - not configured yet" 
+      

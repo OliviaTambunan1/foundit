@@ -1,5 +1,6 @@
 import { useForm } from '@inertiajs/react';
 import Layout from '../components/Layout';
+import { Camera } from 'lucide-react';
 
 interface AuthUser {
     id: number;
@@ -53,7 +54,7 @@ export default function CreateReport({ auth, categories }: CreateReportProps) {
                                                 : 'bg-white text-[#64748B] border-[#E2E8F0] hover:border-[#2563EB]'
                                         }`}
                                     >
-                                        {t === 'lost' ? '🔍 Barang Hilang' : '✓ Barang Ditemukan'}
+                                        {t === 'lost' ? 'Barang Hilang' : 'Barang Ditemukan'}
                                     </button>
                                 ))}
                             </div>
@@ -112,7 +113,9 @@ export default function CreateReport({ auth, categories }: CreateReportProps) {
                         <div>
                             <label className={labelClass}>Foto (opsional)</label>
                             <div className="border-2 border-dashed border-[#E2E8F0] rounded-lg px-4 py-6 text-center hover:border-[#2563EB]/50 transition-colors">
-                                <p className="text-sm text-[#94A3B8] mb-2">📷 Klik untuk upload foto</p>
+                               <p className="text-sm text-[#94A3B8] mb-2 flex items-center justify-center gap-1.5">
+                                <Camera size={14} /> Klik untuk upload foto
+                                    </p>
                                 <input
                                     type="file"
                                     accept="image/*"

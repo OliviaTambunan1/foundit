@@ -1,7 +1,8 @@
 import { Link, router } from '@inertiajs/react';
+import { Package, MapPin } from 'lucide-react';
 import { useState } from 'react';
 import Layout from '../components/Layout';
-import { MapPin } from 'lucide-react';
+import { formatDate } from '../lib/formatDate';
 
 interface ReportItem {
     id: number;
@@ -11,6 +12,7 @@ interface ReportItem {
     category: string;
     status: string;
     photo: string | null;
+    created_at: string;
 }
 
 interface AuthUser {
@@ -62,17 +64,14 @@ export default function LostItems({ reports, filters, categories, auth }: LostIt
                             <option key={cat} value={cat}>{cat}</option>
                         ))}
                     </select>
-                    <button
-                        type="submit"
-                        className="bg-[#1E3A5F] hover:bg-[#2563EB] text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors"
-                    >
+                    <button type="submit" className="bg-[#1E3A5F] hover:bg-[#2563EB] text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors">
                         Cari
                     </button>
                 </form>
 
                 {reports.length === 0 ? (
                     <div className="flex flex-col items-center justify-center py-20 text-center">
-                        <p className="text-4xl mb-3">🔍</p>
+                        <Package size={40} className="text-[#CBD5E1] mb-3" />
                         <p className="text-[#0F172A] font-medium">Tidak ada laporan yang cocok</p>
                         <p className="text-sm text-[#64748B] mt-1">Coba ubah kata kunci atau kategori pencarian</p>
                     </div>
@@ -87,10 +86,12 @@ export default function LostItems({ reports, filters, categories, auth }: LostIt
                                 {report.photo ? (
                                     <img src={`/storage/${report.photo}`} alt={report.title} className="w-full h-36 object-cover" />
                                 ) : (
-                                    <div className="w-full h-36 bg-[#F8FAFC] flex items-center justify-center text-3xl">📦</div>
+                                    <div className="w-full h-36 bg-[#F8FAFC] flex items-center justify-center">
+                                        <Package size={28} className="text-[#CBD5E1]" />
+                                    </div>
                                 )}
-                                <div className="p-5">
-                                    <div className="flex items-start justify-between mb-3">
+                                <div className="p-4">
+                                    <div className="flex items-start justify-between mb-2">
                                         <span className="text-xs px-2.5 py-1 rounded-full font-medium bg-red-50 text-red-600 border border-red-100">
                                             Hilang
                                         </span>
@@ -98,15 +99,18 @@ export default function LostItems({ reports, filters, categories, auth }: LostIt
                                             {report.category}
                                         </span>
                                     </div>
-                                    <h3 className="text-sm font-semibold text-[#0F172A] group-hover:text-[#2563EB] transition-colors mb-1.5">
+                                    <h3 className="text-sm font-semibold text-[#0F172A] group-hover:text-[#2563EB] transition-colors mb-1">
                                         {report.title}
                                     </h3>
                                     <p className="text-xs text-[#94A3B8] mb-2 line-clamp-2">
                                         {report.description ?? 'Tidak ada deskripsi'}
                                     </p>
+                                    <div className="flex items-center justify-between">
                                         <p className="text-xs text-[#64748B] flex items-center gap-1">
                                             <MapPin size={11} className="text-[#94A3B8]" /> {report.location}
                                         </p>
+                                        <p className="text-xs text-[#94A3B8]">{formatDate(report.created_at)}</p>
+                                    </div>
                                 </div>
                             </Link>
                         ))}

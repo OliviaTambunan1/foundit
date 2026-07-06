@@ -62,7 +62,7 @@ export default function EditReport({ report, auth, categories }: EditReportProps
                                                 : 'bg-white text-[#64748B] border-[#E2E8F0] hover:border-[#2563EB]'
                                         }`}
                                     >
-                                        {t === 'lost' ? '🔍 Barang Hilang' : '✓ Barang Ditemukan'}
+                                        {t === 'lost' ? 'Barang Hilang' : 'Barang Ditemukan'}
                                     </button>
                                 ))}
                             </div>

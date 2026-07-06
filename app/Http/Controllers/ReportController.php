@@ -161,10 +161,11 @@ class ReportController extends Controller
         $userId = Auth::id();
 
         $stats = [
-            'total_reports' => Report::count(),
-            'total_lost' => Report::where('type', 'lost')->count(),
-            'total_found' => Report::where('type', 'found')->count(),
-            'total_resolved' => Report::where('status', 'diklaim')->count(),
+            'total_reports' => Report::whereNotIn('status', ['selesai'])->count(),
+            'total_lost' => Report::where('status', 'hilang')->count(),
+            'total_found' => Report::where('status', 'ditemukan')->count(),
+            'total_resolved' => Report::where('status', 'selesai')->count(),
+            'total_claimed' => Report::where('status', 'diklaim')->count(), 
             'my_reports' => Report::where('user_id', $userId)->count(),
             'my_pending_claims' => \App\Models\Claim::where('claimer_id', $userId)
                 ->where('status', 'pending')->count(),
@@ -172,7 +173,6 @@ class ReportController extends Controller
                 $q->where('user_id', $userId);
             })->where('status', 'pending')->count(),
         ];
-
         $recentReports = Report::latest()->take(5)->get();
 
         return Inertia::render('dashboard-stats', [

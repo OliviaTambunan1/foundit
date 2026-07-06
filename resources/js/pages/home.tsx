@@ -1,5 +1,7 @@
 import { Link } from '@inertiajs/react';
+import { Package, MapPin } from 'lucide-react';
 import Layout from '../components/Layout';
+import { formatDate } from '../lib/formatDate';
 
 interface ReportItem {
     id: number;
@@ -7,6 +9,7 @@ interface ReportItem {
     type: string;
     location: string;
     status: string;
+    created_at: string;
 }
 
 interface AuthUser {
@@ -37,12 +40,14 @@ export default function Home({ reports, auth }: HomeProps) {
 
                 {reports.length === 0 ? (
                     <div className="flex flex-col items-center justify-center py-20 text-center">
-                        <p className="text-4xl mb-3">📭</p>
+                        <Package size={40} className="text-[#CBD5E1] mb-3" />
                         <p className="text-[#0F172A] font-medium">Belum ada laporan</p>
                         <p className="text-sm text-[#64748B] mt-1">Jadilah yang pertama melaporkan barang hilang atau temuan</p>
-                        <Link href="/create-report" className="mt-4 bg-[#1E3A5F] hover:bg-[#2563EB] text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors no-underline">
-                            + Lapor Barang
-                        </Link>
+                        {auth.user && (
+                            <Link href="/create-report" className="mt-4 bg-[#1E3A5F] hover:bg-[#2563EB] text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors no-underline">
+                                + Lapor Barang
+                            </Link>
+                        )}
                     </div>
                 ) : (
                     <div className="grid grid-cols-3 gap-4">
@@ -62,9 +67,12 @@ export default function Home({ reports, auth }: HomeProps) {
                                     <h3 className="text-sm font-semibold text-[#0F172A] group-hover:text-[#2563EB] transition-colors mb-1.5">
                                         {report.title}
                                     </h3>
-                                    <p className="text-xs text-[#64748B] flex items-center gap-1">
-                                        <span>📍</span> {report.location}
-                                    </p>
+                                    <div className="flex items-center justify-between mt-3">
+                                        <p className="text-xs text-[#64748B] flex items-center gap-1">
+                                            <MapPin size={11} className="text-[#94A3B8]" /> {report.location}
+                                        </p>
+                                        <p className="text-xs text-[#94A3B8]">{formatDate(report.created_at)}</p>
+                                    </div>
                                 </Link>
                             );
                         })}

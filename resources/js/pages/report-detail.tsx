@@ -317,7 +317,7 @@ function handleClaimSubmit(e: React.FormEvent) {
                                                 <img
                                                     src={`/storage/${claim.photo}`}
                                                     alt="Foto bukti"
-                                                    className="w-full max-h-48 object-cover rounded-lg border border-[#E2E8F0]"
+                                                    className="w-full max-h-32 object-cover rounded-lg border border-[#E2E8F0]"
                                                 />
                                             </div>
                                         )}

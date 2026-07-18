@@ -4,8 +4,13 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\ClaimController;
 use Illuminate\Support\Facades\Route;
+use Inertia\Inertia;
 
-Route::get('/', [ReportController::class, 'home']);
+Route::get('/', function () {
+    return Inertia::render('landing');
+})->name('landing');
+
+Route::get('/home', [ReportController::class, 'home'])->name('home');
 
 Route::get('/lost-items', [ReportController::class, 'lostItems']);
 Route::get('/found-items', [ReportController::class, 'foundItems']);

@@ -6,8 +6,9 @@ interface Stats {
     total_reports: number;
     total_lost: number;
     total_found: number;
-    total_resolved: number;
     total_claimed: number;
+    total_in_progress: number;
+    total_resolved: number;
     my_reports: number;
     my_pending_claims: number;
     claims_to_review: number;
@@ -40,7 +41,12 @@ const STATUS_CONFIG: Record<string, { label: string; className: string }> = {
     selesai: { label: 'Selesai', className: 'bg-slate-50 text-slate-500 border border-slate-100' },
 };
 
-function StatCard({ label, value, sub, highlight }: { label: string; value: number; sub?: string; highlight?: string }) {
+function StatCard({ label, value, sub, highlight }: {
+    label: string;
+    value: number;
+    sub?: string;
+    highlight?: string;
+}) {
     return (
         <div className="bg-white border border-[#E2E8F0] rounded-xl p-5 hover:shadow-sm transition-shadow">
             <p className="text-xs font-medium text-[#64748B] uppercase tracking-wide mb-3">{label}</p>
@@ -79,7 +85,7 @@ export default function DashboardStats({ stats, recentReports, auth }: Dashboard
                                 {stats.claims_to_review} klaim menunggu review kamu
                             </p>
                             <p className="text-xs text-amber-600 mt-0.5">
-                                Periksa bukti kepemilikan dan approve atau tolak klaim yang masuk.
+                                Periksa bukti dan approve atau tolak klaim yang masuk.
                             </p>
                         </div>
                         <Link
@@ -93,11 +99,35 @@ export default function DashboardStats({ stats, recentReports, auth }: Dashboard
 
                 {/* Stat Cards */}
                 <div className="grid grid-cols-5 gap-4 mb-8">
-                    <StatCard label="Total Aktif" value={stats.total_reports} sub="semua laporan aktif" />
-                    <StatCard label="Barang Hilang" value={stats.total_lost} sub="menunggu ditemukan" highlight="text-red-500" />
-                    <StatCard label="Barang Ditemukan" value={stats.total_found} sub="menunggu diklaim" highlight="text-emerald-600" />
-                    <StatCard label="Sedang Diklaim" value={stats.total_claimed} sub="dalam proses serah terima" highlight="text-amber-500" />
-                    <StatCard label="Sudah Selesai" value={stats.total_resolved} sub="berhasil dikembalikan" highlight="text-[#2563EB]" />
+                    <StatCard
+                        label="Total Aktif"
+                        value={stats.total_reports}
+                        sub="semua laporan aktif"
+                    />
+                    <StatCard
+                        label="Barang Hilang"
+                        value={stats.total_lost}
+                        sub="menunggu ditemukan"
+                        highlight="text-red-500"
+                    />
+                    <StatCard
+                        label="Barang Ditemukan"
+                        value={stats.total_found}
+                        sub="menunggu diklaim"
+                        highlight="text-emerald-600"
+                    />
+                    <StatCard
+                        label="Sedang Diklaim"
+                        value={stats.total_claimed}
+                        sub="dalam proses serah terima"
+                        highlight="text-amber-500"
+                    />
+                    <StatCard
+                        label="Sudah Selesai"
+                        value={stats.total_resolved}
+                        sub="berhasil dikembalikan"
+                        highlight="text-[#2563EB]"
+                    />
                 </div>
 
                 {/* Tabel Laporan Terbaru */}
@@ -115,9 +145,9 @@ export default function DashboardStats({ stats, recentReports, auth }: Dashboard
                         <thead>
                             <tr className="bg-[#F8FAFC] border-b border-[#F1F5F9]">
                                 <th className="text-left text-xs font-medium text-[#64748B] uppercase tracking-wide px-6 py-3">Barang</th>
-                                <th className="text-left text-xs font-medium text-[#64748B] uppercase tracking-wide px-6 py-3">Lokasi</th>
                                 <th className="text-left text-xs font-medium text-[#64748B] uppercase tracking-wide px-6 py-3">Status</th>
-                                <th className="text-left text-xs font-medium text-[#94A3B8] uppercase tracking-wide px-6 py-3">Dilaporkan</th>
+                                <th className="text-left text-xs font-medium text-[#64748B] uppercase tracking-wide px-6 py-3">Lokasi</th>
+                                <th className="text-left text-xs font-medium text-[#64748B] uppercase tracking-wide px-6 py-3">Dilaporkan</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -139,18 +169,22 @@ export default function DashboardStats({ stats, recentReports, auth }: Dashboard
                                                 {report.title}
                                             </Link>
                                         </td>
-                                        <td className="px-6 py-3.5 text-sm text-[#64748B]">{report.location}</td>
-                                        <td className="px-6 py-3.5 text-xs text-[#94A3B8]">{formatDate(report.created_at)}</td>
                                         <td className="px-6 py-3.5">
                                             <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${cfg.className}`}>
                                                 {cfg.label}
                                             </span>
                                         </td>
+                                        <td className="px-6 py-3.5 text-sm text-[#64748B]">
+                                            {report.location}
+                                        </td>
+                                        <td className="px-6 py-3.5 text-xs text-[#94A3B8]">
+                                            {formatDate(report.created_at)}
+                                        </td>
                                     </tr>
                                 );
                             })}
                         </tbody>
-                    </table>
+                    </table> 
                 </div>
             </div>
         </Layout>

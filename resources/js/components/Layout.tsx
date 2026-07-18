@@ -39,7 +39,7 @@ export default function Layout({ children, user }: LayoutProps) {
             <aside className="w-56 bg-[#1E3A5F] flex flex-col fixed h-full z-20">
                 {/* Logo */}
                 <div className="px-5 py-5 border-b border-[#2A4A72]">
-                    <Link href="/" className="flex items-center gap-2.5 no-underline">
+                    <Link href={user ? '/home' : '/'} className="flex items-center gap-2.5 no-underline">
                         <div className="w-7 h-7 rounded-lg bg-[#2563EB] flex items-center justify-center text-white text-xs font-bold tracking-tight">
                             F
                         </div>

@@ -7,8 +7,7 @@ export default function Landing() {
             {/* Navbar */}
             <nav style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 32px', background: 'white', borderBottom: '1px solid #E2E8F0' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '9px' }}>
-                    <div style={{ width: '30px', height: '30px', borderRadius: '8px', background: '#1E3A5F', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 600, fontSize: '13px' }}>F</div>
-                    <span style={{ color: '#0F172A', fontWeight: 600, fontSize: '15px' }}>FoundIT</span>
+                    <span style={{ color: '#0F172A', fontWeight: 700, fontSize: '16px', letterSpacing: '-0.3px' }}>FoundIT</span>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                     <a href="/login" style={{ color: '#64748B', fontSize: '13px', textDecoration: 'none' }}>Masuk</a>

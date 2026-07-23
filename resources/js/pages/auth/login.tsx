@@ -21,9 +21,6 @@ export default function Login({ status, canResetPassword }: LoginProps) {
         <div className="min-h-screen bg-[#F8FAFC] flex items-center justify-center px-4">
             <div className="w-full max-w-sm">
                 <div className="flex items-center justify-center gap-2.5 mb-8">
-                    <div className="w-9 h-9 rounded-lg bg-[#1E3A5F] flex items-center justify-center text-white text-sm font-bold">
-                        F
-                    </div>
                     <span className="font-semibold text-[#0F172A] text-xl tracking-tight">FoundIT</span>
                 </div>
 

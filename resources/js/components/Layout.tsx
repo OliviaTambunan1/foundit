@@ -40,10 +40,7 @@ export default function Layout({ children, user }: LayoutProps) {
                 {/* Logo */}
                 <div className="px-5 py-5 border-b border-[#2A4A72]">
                     <Link href={user ? '/home' : '/'} className="flex items-center gap-2.5 no-underline">
-                        <div className="w-7 h-7 rounded-lg bg-[#2563EB] flex items-center justify-center text-white text-xs font-bold tracking-tight">
-                            F
-                        </div>
-                        <span className="font-semibold text-white text-[15px] tracking-tight">FoundIT</span>
+                        <span className="font-semibold text-white text-[16px] tracking-tight">FoundIT</span>
                     </Link>
                 </div>
 
